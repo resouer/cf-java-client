@@ -35,6 +35,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.lib.domain.CloudQuota;
 import org.cloudfoundry.client.lib.domain.CloudRoute;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
@@ -47,155 +48,162 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.ResponseErrorHandler;
 
 /**
- * Interface defining operations available for the cloud controller REST client implementations
+ * Interface defining operations available for the cloud controller REST client
+ * implementations
  *
  * @author Thomas Risberg
  */
 public interface CloudControllerClient {
 
-	// User and Info methods
+    // User and Info methods
 
-	void setResponseErrorHandler(ResponseErrorHandler errorHandler);
+    void setResponseErrorHandler(ResponseErrorHandler errorHandler);
 
-	URL getCloudControllerUrl();
+    URL getCloudControllerUrl();
 
-	CloudInfo getInfo();
+    CloudInfo getInfo();
 
-	List<CloudSpace> getSpaces();
+    List<CloudSpace> getSpaces();
 
-	List<CloudOrganization> getOrganizations();
+    List<CloudOrganization> getOrganizations();
 
-	OAuth2AccessToken login();
+    List<CloudQuota> getQuotas();
 
-	void logout();
+    OAuth2AccessToken login();
 
-	void register(String email, String password);
+    void logout();
 
-	void updatePassword(String newPassword);
+    void register(String email, String password);
 
-	void updatePassword(CloudCredentials credentials, String newPassword);
+    void updatePassword(String newPassword);
 
-	void unregister();
+    void updatePassword(CloudCredentials credentials, String newPassword);
 
-	// Service methods
+    void unregister();
 
-	List<CloudService> getServices();
+    // Service methods
 
-	void createService(CloudService service);
+    List<CloudService> getServices();
 
-	void createUserProvidedService(CloudService service, Map<String, Object> credentials);
+    void createService(CloudService service);
 
-	CloudService getService(String service);
+    void createUserProvidedService(CloudService service,
+            Map<String, Object> credentials);
 
-	void deleteService(String service);
+    CloudService getService(String service);
 
-	void deleteAllServices();
+    void deleteService(String service);
 
-	List<CloudServiceOffering> getServiceOfferings();
+    void deleteAllServices();
 
-	// App methods
+    List<CloudServiceOffering> getServiceOfferings();
 
-	List<CloudApplication> getApplications();
+    // App methods
 
-	CloudApplication getApplication(String appName);
-	
-	CloudApplication getApplication(UUID appGuid);
+    List<CloudApplication> getApplications();
 
-	ApplicationStats getApplicationStats(String appName);
+    CloudApplication getApplication(String appName);
 
-	void createApplication(String appName, Staging staging, Integer memory, List<String> uris,
-	                       List<String> serviceNames);
+    CloudApplication getApplication(UUID appGuid);
 
-	void createApplication(String appName, Staging staging, Integer disk, Integer memory,
-	                       List<String> uris, List<String> serviceNames);
+    ApplicationStats getApplicationStats(String appName);
 
-	void uploadApplication(String appName, File file, UploadStatusCallback callback) throws IOException;
+    void createApplication(String appName, Staging staging, Integer memory,
+            List<String> uris, List<String> serviceNames);
 
-	void uploadApplication(String appName, ApplicationArchive archive, UploadStatusCallback callback) throws IOException;
+    void createApplication(String appName, Staging staging, Integer disk,
+            Integer memory, List<String> uris, List<String> serviceNames);
 
-	StartingInfo startApplication(String appName);
+    void uploadApplication(String appName, File file,
+            UploadStatusCallback callback) throws IOException;
 
-	void debugApplication(String appName, CloudApplication.DebugMode mode);
+    void uploadApplication(String appName, ApplicationArchive archive,
+            UploadStatusCallback callback) throws IOException;
 
-	void stopApplication(String appName);
+    StartingInfo startApplication(String appName);
 
-	StartingInfo restartApplication(String appName);
+    void debugApplication(String appName, CloudApplication.DebugMode mode);
 
-	void deleteApplication(String appName);
+    void stopApplication(String appName);
 
-	void deleteAllApplications();
+    StartingInfo restartApplication(String appName);
 
-	void updateApplicationDiskQuota(String appName, int disk);
+    void deleteApplication(String appName);
 
-	void updateApplicationMemory(String appName, int memory);
+    void deleteAllApplications();
 
-	void updateApplicationInstances(String appName, int instances);
+    void updateApplicationDiskQuota(String appName, int disk);
 
-	void updateApplicationServices(String appName, List<String> services);
+    void updateApplicationMemory(String appName, int memory);
 
-	void updateApplicationStaging(String appName, Staging staging);
+    void updateApplicationInstances(String appName, int instances);
 
-	void updateApplicationUris(String appName, List<String> uris);
+    void updateApplicationServices(String appName, List<String> services);
 
-	void updateApplicationEnv(String appName, Map<String, String> env);
+    void updateApplicationStaging(String appName, Staging staging);
 
-	void updateApplicationEnv(String appName, List<String> env);
+    void updateApplicationUris(String appName, List<String> uris);
 
-	Map<String, String> getLogs(String appName);
+    void updateApplicationEnv(String appName, Map<String, String> env);
 
-	StreamingLogToken streamLogs(String appName, ApplicationLogListener listener);
+    void updateApplicationEnv(String appName, List<String> env);
 
-    StreamingLogToken streamRecentLogs(String appName, ApplicationLogListener listener);
+    Map<String, String> getLogs(String appName);
+
+    StreamingLogToken streamLogs(String appName, ApplicationLogListener listener);
+
+    StreamingLogToken streamRecentLogs(String appName,
+            ApplicationLogListener listener);
 
     Map<String, String> getCrashLogs(String appName);
 
-	String getFile(String appName, int instanceIndex, String filePath, int startPosition, int endPosition);
+    String getFile(String appName, int instanceIndex, String filePath,
+            int startPosition, int endPosition);
 
-	void bindService(String appName, String serviceName);
+    void bindService(String appName, String serviceName);
 
-	void unbindService(String appName, String serviceName);
+    void unbindService(String appName, String serviceName);
 
-	InstancesInfo getApplicationInstances(String appName);
+    InstancesInfo getApplicationInstances(String appName);
 
-	InstancesInfo getApplicationInstances(CloudApplication app);
+    InstancesInfo getApplicationInstances(CloudApplication app);
 
-	CrashesInfo getCrashes(String appName);
+    CrashesInfo getCrashes(String appName);
 
-	void rename(String appName, String newName);
+    void rename(String appName, String newName);
 
-	String getStagingLogs(StartingInfo info, int offset);
+    String getStagingLogs(StartingInfo info, int offset);
 
-	List<CloudStack> getStacks();
+    List<CloudStack> getStacks();
 
-	CloudStack getStack(String name);
+    CloudStack getStack(String name);
 
-	// Domains and routes management
+    // Domains and routes management
 
-	List<CloudDomain> getDomainsForOrg();
+    List<CloudDomain> getDomainsForOrg();
 
-	List<CloudDomain> getDomains();
+    List<CloudDomain> getDomains();
 
-	List<CloudDomain> getPrivateDomains();
+    List<CloudDomain> getPrivateDomains();
 
-	List<CloudDomain> getSharedDomains();
+    List<CloudDomain> getSharedDomains();
 
-	void addDomain(String domainName);
+    void addDomain(String domainName);
 
-	void deleteDomain(String domainName);
+    void deleteDomain(String domainName);
 
-	void removeDomain(String domainName);
+    void removeDomain(String domainName);
 
-	List<CloudRoute> getRoutes(String domainName);
+    List<CloudRoute> getRoutes(String domainName);
 
-	void addRoute(String host, String domainName);
+    void addRoute(String host, String domainName);
 
-	void deleteRoute(String host, String domainName);
+    void deleteRoute(String host, String domainName);
 
-	// Misc. utility methods
+    // Misc. utility methods
 
-	void registerRestLogListener(RestLogCallback callBack);
+    void registerRestLogListener(RestLogCallback callBack);
 
-	void unRegisterRestLogListener(RestLogCallback callBack);
+    void unRegisterRestLogListener(RestLogCallback callBack);
 
-    
 }

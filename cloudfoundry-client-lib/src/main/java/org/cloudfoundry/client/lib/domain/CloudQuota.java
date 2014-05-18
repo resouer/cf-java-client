@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ package org.cloudfoundry.client.lib.domain;
  */
 public class CloudQuota extends CloudEntity {
 
-    private boolean non_basic_services_allowed = false;
+    private boolean nonBasicServicesAllowed = false;
 
-    public CloudQuota(Meta meta, String name,
-            boolean non_basic_services_allowed, int total_services,
-            int total_routes, long memory_limit) {
+    public CloudQuota(Meta meta, String name, boolean nonBasicServicesAllowed,
+            int totalServices, int totalRoutes, long memoryLimit) {
         super(meta, name);
-        this.non_basic_services_allowed = non_basic_services_allowed;
+        this.nonBasicServicesAllowed = nonBasicServicesAllowed;
 
     }
-    public boolean isNon_basic_services_allowed() {
-        return non_basic_services_allowed;
+
+    public boolean isNonBasicServicesAllowed() {
+        return nonBasicServicesAllowed;
     }
 
 }

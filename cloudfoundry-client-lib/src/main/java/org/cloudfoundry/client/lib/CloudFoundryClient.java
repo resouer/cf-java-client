@@ -30,6 +30,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.DebugMode;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.lib.domain.CloudQuota;
 import org.cloudfoundry.client.lib.domain.CloudRoute;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
@@ -55,410 +56,469 @@ import org.springframework.web.client.ResponseErrorHandler;
  */
 public class CloudFoundryClient implements CloudFoundryOperations {
 
-	private CloudControllerClient cc;
+    private CloudControllerClient cc;
 
-	private CloudInfo info;
+    private CloudInfo info;
 
-	/**
-	 * Construct client for anonymous user. Useful only to get to the '/info' endpoint.
-	 */
+    /**
+     * Construct client for anonymous user. Useful only to get to the '/info'
+     * endpoint.
+     */
 
-	public CloudFoundryClient(URL cloudControllerUrl) {
-		this(null, cloudControllerUrl, null, (HttpProxyConfiguration) null, false);
-	}
-
-	public CloudFoundryClient(URL cloudControllerUrl, boolean trustSelfSignedCerts) {
-		this(null, cloudControllerUrl, null, (HttpProxyConfiguration) null, trustSelfSignedCerts);
-	}
-
-	public CloudFoundryClient(URL cloudControllerUrl, HttpProxyConfiguration httpProxyConfiguration) {
-		this(null, cloudControllerUrl, null, httpProxyConfiguration, false);
-	}
-
-	public CloudFoundryClient(URL cloudControllerUrl, HttpProxyConfiguration httpProxyConfiguration,
-	                          boolean trustSelfSignedCerts) {
-		this(null, cloudControllerUrl, null, httpProxyConfiguration, trustSelfSignedCerts);
-	}
-
-	/**
-	 * Construct client without a default org and space.
-	 */
-
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl) {
-		this(credentials, cloudControllerUrl, null, (HttpProxyConfiguration) null, false);
-	}
-
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl,
-	                          boolean trustSelfSignedCerts) {
-		this(credentials, cloudControllerUrl, null, (HttpProxyConfiguration) null, trustSelfSignedCerts);
-	}
-
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl,
-	                          HttpProxyConfiguration httpProxyConfiguration) {
-		this(credentials, cloudControllerUrl, null, httpProxyConfiguration, false);
-	}
-
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl,
-	                          HttpProxyConfiguration httpProxyConfiguration, boolean trustSelfSignedCerts) {
-		this(credentials, cloudControllerUrl, null, httpProxyConfiguration, trustSelfSignedCerts);
-	}
-
-	/**
-	 * Construct a client with a default CloudSpace.
-	 */
-
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, CloudSpace sessionSpace) {
-		this(credentials, cloudControllerUrl, sessionSpace, null, false);
+    public CloudFoundryClient(URL cloudControllerUrl) {
+        this(null, cloudControllerUrl, null, (HttpProxyConfiguration) null,
+                false);
     }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, CloudSpace sessionSpace,
-	                          boolean trustSelfSignedCerts) {
-		this(credentials, cloudControllerUrl, sessionSpace, null, trustSelfSignedCerts);
-	}
+    public CloudFoundryClient(URL cloudControllerUrl,
+            boolean trustSelfSignedCerts) {
+        this(null, cloudControllerUrl, null, (HttpProxyConfiguration) null,
+                trustSelfSignedCerts);
+    }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, CloudSpace sessionSpace,
-	                          HttpProxyConfiguration httpProxyConfiguration) {
-		this(credentials, cloudControllerUrl, sessionSpace, httpProxyConfiguration, false);
-	}
+    public CloudFoundryClient(URL cloudControllerUrl,
+            HttpProxyConfiguration httpProxyConfiguration) {
+        this(null, cloudControllerUrl, null, httpProxyConfiguration, false);
+    }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, CloudSpace sessionSpace,
-	                          HttpProxyConfiguration httpProxyConfiguration, boolean trustSelfSignedCerts) {
-		Assert.notNull(cloudControllerUrl, "URL for cloud controller cannot be null");
-		CloudControllerClientFactory cloudControllerClientFactory =
-				new CloudControllerClientFactory(httpProxyConfiguration, trustSelfSignedCerts);
-		this.cc = cloudControllerClientFactory.newCloudController(cloudControllerUrl, credentials, sessionSpace);
-	}
+    public CloudFoundryClient(URL cloudControllerUrl,
+            HttpProxyConfiguration httpProxyConfiguration,
+            boolean trustSelfSignedCerts) {
+        this(null, cloudControllerUrl, null, httpProxyConfiguration,
+                trustSelfSignedCerts);
+    }
 
-	/**
-	 * Construct a client with a default space name and org name.
-	 */
+    /**
+     * Construct client without a default org and space.
+     */
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, String orgName, String spaceName) {
-		this(credentials, cloudControllerUrl, orgName, spaceName, null, false);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl) {
+        this(credentials, cloudControllerUrl, null,
+                (HttpProxyConfiguration) null, false);
+    }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, String orgName, String spaceName,
-	                          boolean trustSelfSignedCerts) {
-		this(credentials, cloudControllerUrl, orgName, spaceName, null, trustSelfSignedCerts);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, boolean trustSelfSignedCerts) {
+        this(credentials, cloudControllerUrl, null,
+                (HttpProxyConfiguration) null, trustSelfSignedCerts);
+    }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, String orgName, String spaceName,
-							  HttpProxyConfiguration httpProxyConfiguration) {
-		this(credentials, cloudControllerUrl, orgName, spaceName, httpProxyConfiguration, false);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl,
+            HttpProxyConfiguration httpProxyConfiguration) {
+        this(credentials, cloudControllerUrl, null, httpProxyConfiguration,
+                false);
+    }
 
-	public CloudFoundryClient(CloudCredentials credentials, URL cloudControllerUrl, String orgName, String spaceName,
-	                          HttpProxyConfiguration httpProxyConfiguration, boolean trustSelfSignedCerts) {
-		Assert.notNull(cloudControllerUrl, "URL for cloud controller cannot be null");
-		CloudControllerClientFactory cloudControllerClientFactory =
-				new CloudControllerClientFactory(httpProxyConfiguration, trustSelfSignedCerts);
-		this.cc = cloudControllerClientFactory.newCloudController(cloudControllerUrl, credentials, orgName, spaceName);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl,
+            HttpProxyConfiguration httpProxyConfiguration,
+            boolean trustSelfSignedCerts) {
+        this(credentials, cloudControllerUrl, null, httpProxyConfiguration,
+                trustSelfSignedCerts);
+    }
 
-	public void setResponseErrorHandler(ResponseErrorHandler errorHandler) {
-		cc.setResponseErrorHandler(errorHandler);
-	}
+    /**
+     * Construct a client with a default CloudSpace.
+     */
 
-	public URL getCloudControllerUrl() {
-		return cc.getCloudControllerUrl();
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, CloudSpace sessionSpace) {
+        this(credentials, cloudControllerUrl, sessionSpace, null, false);
+    }
 
-	public CloudInfo getCloudInfo() {
-		if (info == null) {
-			info = cc.getInfo();
-		}
-		return info;
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, CloudSpace sessionSpace,
+            boolean trustSelfSignedCerts) {
+        this(credentials, cloudControllerUrl, sessionSpace, null,
+                trustSelfSignedCerts);
+    }
 
-	public List<CloudSpace> getSpaces() {
-		return cc.getSpaces();
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, CloudSpace sessionSpace,
+            HttpProxyConfiguration httpProxyConfiguration) {
+        this(credentials, cloudControllerUrl, sessionSpace,
+                httpProxyConfiguration, false);
+    }
 
-	public List<CloudOrganization> getOrganizations() {
-		return cc.getOrganizations();
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, CloudSpace sessionSpace,
+            HttpProxyConfiguration httpProxyConfiguration,
+            boolean trustSelfSignedCerts) {
+        Assert.notNull(cloudControllerUrl,
+                "URL for cloud controller cannot be null");
+        CloudControllerClientFactory cloudControllerClientFactory = new CloudControllerClientFactory(
+                httpProxyConfiguration, trustSelfSignedCerts);
+        this.cc = cloudControllerClientFactory.newCloudController(
+                cloudControllerUrl, credentials, sessionSpace);
+    }
 
-	public void register(String email, String password) {
-		cc.register(email, password);
-	}
+    /**
+     * Construct a client with a default space name and org name.
+     */
 
-	public void updatePassword(String newPassword) {
-		cc.updatePassword(newPassword);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, String orgName, String spaceName) {
+        this(credentials, cloudControllerUrl, orgName, spaceName, null, false);
+    }
 
-	public void updatePassword(CloudCredentials credentials, String newPassword) {
-		cc.updatePassword(credentials, newPassword);
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, String orgName, String spaceName,
+            boolean trustSelfSignedCerts) {
+        this(credentials, cloudControllerUrl, orgName, spaceName, null,
+                trustSelfSignedCerts);
+    }
 
-	public void unregister() {
-		cc.unregister();
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, String orgName, String spaceName,
+            HttpProxyConfiguration httpProxyConfiguration) {
+        this(credentials, cloudControllerUrl, orgName, spaceName,
+                httpProxyConfiguration, false);
+    }
 
-	public OAuth2AccessToken login() {
-		return cc.login();
-	}
+    public CloudFoundryClient(CloudCredentials credentials,
+            URL cloudControllerUrl, String orgName, String spaceName,
+            HttpProxyConfiguration httpProxyConfiguration,
+            boolean trustSelfSignedCerts) {
+        Assert.notNull(cloudControllerUrl,
+                "URL for cloud controller cannot be null");
+        CloudControllerClientFactory cloudControllerClientFactory = new CloudControllerClientFactory(
+                httpProxyConfiguration, trustSelfSignedCerts);
+        this.cc = cloudControllerClientFactory.newCloudController(
+                cloudControllerUrl, credentials, orgName, spaceName);
+    }
 
-	public void logout() {
-		cc.logout();
-	}
+    public void setResponseErrorHandler(ResponseErrorHandler errorHandler) {
+        cc.setResponseErrorHandler(errorHandler);
+    }
 
-	public List<CloudApplication> getApplications() {
-		return cc.getApplications();
-	}
+    public URL getCloudControllerUrl() {
+        return cc.getCloudControllerUrl();
+    }
 
-	public CloudApplication getApplication(String appName) {
-		return cc.getApplication(appName);
-	}
+    public CloudInfo getCloudInfo() {
+        if (info == null) {
+            info = cc.getInfo();
+        }
+        return info;
+    }
 
-	public CloudApplication getApplication(UUID appGuid) {
-		return cc.getApplication(appGuid);
-	}
+    public List<CloudSpace> getSpaces() {
+        return cc.getSpaces();
+    }
 
-	public ApplicationStats getApplicationStats(String appName) {
-		return cc.getApplicationStats(appName);
-	}
+    public List<CloudOrganization> getOrganizations() {
+        return cc.getOrganizations();
+    }
 
-	public void createApplication(String appName, Staging staging, Integer memory, List<String> uris,
-								  List<String> serviceNames) {
-		cc.createApplication(appName, staging, memory, uris, serviceNames);
-	}
+    public List<CloudQuota> getQuotas() {
+        return cc.getQuotas();
+    }
 
-	public void createApplication(String appName, Staging staging, Integer disk, Integer memory, List<String> uris,
-								  List<String> serviceNames) {
-		cc.createApplication(appName, staging, disk, memory, uris, serviceNames);
-	}
+    public void register(String email, String password) {
+        cc.register(email, password);
+    }
 
-	public void createService(CloudService service) {
-		cc.createService(service);
-	}
+    public void updatePassword(String newPassword) {
+        cc.updatePassword(newPassword);
+    }
 
-	public void createUserProvidedService(CloudService service, Map<String, Object> credentials) {
-		cc.createUserProvidedService(service, credentials);
-	}
+    public void updatePassword(CloudCredentials credentials, String newPassword) {
+        cc.updatePassword(credentials, newPassword);
+    }
 
-	public void uploadApplication(String appName, String file) throws IOException {
-		cc.uploadApplication(appName, new File(file), null);
-	}
+    public void unregister() {
+        cc.unregister();
+    }
 
-	public void uploadApplication(String appName, File file) throws IOException {
-		cc.uploadApplication(appName, file, null);
-	}
+    public OAuth2AccessToken login() {
+        return cc.login();
+    }
 
-	public void uploadApplication(String appName, File file, UploadStatusCallback callback) throws IOException {
-		cc.uploadApplication(appName, file, callback);
-	}
+    public void logout() {
+        cc.logout();
+    }
 
-	public void uploadApplication(String appName, ApplicationArchive archive) throws IOException {
-		cc.uploadApplication(appName, archive, null);
-	}
+    public List<CloudApplication> getApplications() {
+        return cc.getApplications();
+    }
 
-	public void uploadApplication(String appName, ApplicationArchive archive, UploadStatusCallback callback) throws IOException {
-		cc.uploadApplication(appName, archive, callback);
-	}
+    public CloudApplication getApplication(String appName) {
+        return cc.getApplication(appName);
+    }
 
-	public StartingInfo startApplication(String appName) {
-		return cc.startApplication(appName);
-	}
+    public CloudApplication getApplication(UUID appGuid) {
+        return cc.getApplication(appGuid);
+    }
 
-	public void debugApplication(String appName, DebugMode mode) {
-		cc.debugApplication(appName, mode);
-	}
+    public ApplicationStats getApplicationStats(String appName) {
+        return cc.getApplicationStats(appName);
+    }
 
-	public void stopApplication(String appName) {
-		cc.stopApplication(appName);
-	}
+    public void createApplication(String appName, Staging staging,
+            Integer memory, List<String> uris, List<String> serviceNames) {
+        cc.createApplication(appName, staging, memory, uris, serviceNames);
+    }
 
-	public StartingInfo restartApplication(String appName) {
-		return cc.restartApplication(appName);
-	}
+    public void createApplication(String appName, Staging staging,
+            Integer disk, Integer memory, List<String> uris,
+            List<String> serviceNames) {
+        cc.createApplication(appName, staging, disk, memory, uris, serviceNames);
+    }
 
-	public void deleteApplication(String appName) {
-		cc.deleteApplication(appName);
-	}
+    public void createService(CloudService service) {
+        cc.createService(service);
+    }
 
-	public void deleteAllApplications() {
-		cc.deleteAllApplications();
-	}
+    public void createUserProvidedService(CloudService service,
+            Map<String, Object> credentials) {
+        cc.createUserProvidedService(service, credentials);
+    }
 
-	public void deleteAllServices() {
-		cc.deleteAllServices();
-	}
+    public void uploadApplication(String appName, String file)
+            throws IOException {
+        cc.uploadApplication(appName, new File(file), null);
+    }
 
-	public void updateApplicationDiskQuota(String appName, int disk) {
-		cc.updateApplicationDiskQuota(appName, disk);
-	}
+    public void uploadApplication(String appName, File file) throws IOException {
+        cc.uploadApplication(appName, file, null);
+    }
 
-	public void updateApplicationMemory(String appName, int memory) {
-		cc.updateApplicationMemory(appName, memory);
-	}
+    public void uploadApplication(String appName, File file,
+            UploadStatusCallback callback) throws IOException {
+        cc.uploadApplication(appName, file, callback);
+    }
 
-	public void updateApplicationInstances(String appName, int instances) {
-		cc.updateApplicationInstances(appName, instances);
-	}
+    public void uploadApplication(String appName, ApplicationArchive archive)
+            throws IOException {
+        cc.uploadApplication(appName, archive, null);
+    }
 
-	public void updateApplicationServices(String appName, List<String> services) {
-		cc.updateApplicationServices(appName, services);
-	}
+    public void uploadApplication(String appName, ApplicationArchive archive,
+            UploadStatusCallback callback) throws IOException {
+        cc.uploadApplication(appName, archive, callback);
+    }
 
-	public void updateApplicationStaging(String appName, Staging staging) {
-		cc.updateApplicationStaging(appName, staging);
-	}
+    public StartingInfo startApplication(String appName) {
+        return cc.startApplication(appName);
+    }
 
-	public void updateApplicationUris(String appName, List<String> uris) {
-		cc.updateApplicationUris(appName, uris);
-	}
+    public void debugApplication(String appName, DebugMode mode) {
+        cc.debugApplication(appName, mode);
+    }
 
-	public void updateApplicationEnv(String appName, Map<String, String> env) {
-		cc.updateApplicationEnv(appName, env);
-	}
+    public void stopApplication(String appName) {
+        cc.stopApplication(appName);
+    }
 
-	public void updateApplicationEnv(String appName, List<String> env) {
-		cc.updateApplicationEnv(appName, env);
-	}
+    public StartingInfo restartApplication(String appName) {
+        return cc.restartApplication(appName);
+    }
 
-	/**
-	 * @deprecated use {@link #streamLogs(String, ApplicationLogListener)} or {@link #streamRecentLogs(String, ApplicationLogListener)}
-	 */
-	public Map<String, String> getLogs(String appName) {
-		return cc.getLogs(appName);
-	}
+    public void deleteApplication(String appName) {
+        cc.deleteApplication(appName);
+    }
 
-	public StreamingLogToken streamLogs(String appName, ApplicationLogListener listener) {
-	    return cc.streamLogs(appName, listener);
-	}
+    public void deleteAllApplications() {
+        cc.deleteAllApplications();
+    }
 
-    public StreamingLogToken streamRecentLogs(String appName, ApplicationLogListener listener) {
+    public void deleteAllServices() {
+        cc.deleteAllServices();
+    }
+
+    public void updateApplicationDiskQuota(String appName, int disk) {
+        cc.updateApplicationDiskQuota(appName, disk);
+    }
+
+    public void updateApplicationMemory(String appName, int memory) {
+        cc.updateApplicationMemory(appName, memory);
+    }
+
+    public void updateApplicationInstances(String appName, int instances) {
+        cc.updateApplicationInstances(appName, instances);
+    }
+
+    public void updateApplicationServices(String appName, List<String> services) {
+        cc.updateApplicationServices(appName, services);
+    }
+
+    public void updateApplicationStaging(String appName, Staging staging) {
+        cc.updateApplicationStaging(appName, staging);
+    }
+
+    public void updateApplicationUris(String appName, List<String> uris) {
+        cc.updateApplicationUris(appName, uris);
+    }
+
+    public void updateApplicationEnv(String appName, Map<String, String> env) {
+        cc.updateApplicationEnv(appName, env);
+    }
+
+    public void updateApplicationEnv(String appName, List<String> env) {
+        cc.updateApplicationEnv(appName, env);
+    }
+
+    /**
+     * @deprecated use {@link #streamLogs(String, ApplicationLogListener)} or
+     *             {@link #streamRecentLogs(String, ApplicationLogListener)}
+     */
+    public Map<String, String> getLogs(String appName) {
+        return cc.getLogs(appName);
+    }
+
+    public StreamingLogToken streamLogs(String appName,
+            ApplicationLogListener listener) {
+        return cc.streamLogs(appName, listener);
+    }
+
+    public StreamingLogToken streamRecentLogs(String appName,
+            ApplicationLogListener listener) {
         return cc.streamRecentLogs(appName, listener);
     }
-	
-	public Map<String, String> getCrashLogs(String appName) {
-		return cc.getCrashLogs(appName);
-	}
-	
-	public String getStagingLogs(StartingInfo info, int offset) {
-		return cc.getStagingLogs(info, offset);
-	}
 
-	public String getFile(String appName, int instanceIndex, String filePath) {
-		return cc.getFile(appName, instanceIndex, filePath, 0, -1);
-	}
+    public Map<String, String> getCrashLogs(String appName) {
+        return cc.getCrashLogs(appName);
+    }
 
-	public String getFile(String appName, int instanceIndex, String filePath, int startPosition) {
-		Assert.isTrue(startPosition >= 0,
-				startPosition + " is not a valid value for start position, it should be 0 or greater.");
-		return cc.getFile(appName, instanceIndex, filePath, startPosition, -1);
-	}
+    public String getStagingLogs(StartingInfo info, int offset) {
+        return cc.getStagingLogs(info, offset);
+    }
 
-	public String getFile(String appName, int instanceIndex, String filePath, int startPosition, int endPosition) {
-		Assert.isTrue(startPosition >= 0,
-				startPosition + " is not a valid value for start position, it should be 0 or greater.");
-		Assert.isTrue(endPosition > startPosition,
-				endPosition + " is not a valid value for end position, it should be greater than startPosition " +
-						"which is " + startPosition + ".");
-		return cc.getFile(appName, instanceIndex, filePath, startPosition, endPosition - 1);
-	}
+    public String getFile(String appName, int instanceIndex, String filePath) {
+        return cc.getFile(appName, instanceIndex, filePath, 0, -1);
+    }
 
-	public String getFileTail(String appName, int instanceIndex, String filePath, int length) {
-		Assert.isTrue(length > 0, length + " is not a valid value for length, it should be 1 or greater.");
-		return cc.getFile(appName, instanceIndex, filePath, -1, length);
-	}
+    public String getFile(String appName, int instanceIndex, String filePath,
+            int startPosition) {
+        Assert.isTrue(
+                startPosition >= 0,
+                startPosition
+                        + " is not a valid value for start position, it should be 0 or greater.");
+        return cc.getFile(appName, instanceIndex, filePath, startPosition, -1);
+    }
 
-	// list services, un/provision services, modify instance
+    public String getFile(String appName, int instanceIndex, String filePath,
+            int startPosition, int endPosition) {
+        Assert.isTrue(
+                startPosition >= 0,
+                startPosition
+                        + " is not a valid value for start position, it should be 0 or greater.");
+        Assert.isTrue(
+                endPosition > startPosition,
+                endPosition
+                        + " is not a valid value for end position, it should be greater than startPosition "
+                        + "which is " + startPosition + ".");
+        return cc.getFile(appName, instanceIndex, filePath, startPosition,
+                endPosition - 1);
+    }
 
-	public List<CloudService> getServices() {
-		return cc.getServices();
-	}
+    public String getFileTail(String appName, int instanceIndex,
+            String filePath, int length) {
+        Assert.isTrue(
+                length > 0,
+                length
+                        + " is not a valid value for length, it should be 1 or greater.");
+        return cc.getFile(appName, instanceIndex, filePath, -1, length);
+    }
 
-	public CloudService getService(String service) {
-		return cc.getService(service);
-	}
+    // list services, un/provision services, modify instance
 
-	public void deleteService(String service) {
-		cc.deleteService(service);
-	}
+    public List<CloudService> getServices() {
+        return cc.getServices();
+    }
 
-	public List<CloudServiceOffering> getServiceOfferings() {
-		return cc.getServiceOfferings();
-	}
+    public CloudService getService(String service) {
+        return cc.getService(service);
+    }
 
-	public void bindService(String appName, String serviceName) {
-		cc.bindService(appName, serviceName);
-	}
+    public void deleteService(String service) {
+        cc.deleteService(service);
+    }
 
-	public void unbindService(String appName, String serviceName) {
-		cc.unbindService(appName, serviceName);
-	}
+    public List<CloudServiceOffering> getServiceOfferings() {
+        return cc.getServiceOfferings();
+    }
 
-	public InstancesInfo getApplicationInstances(String appName) {
-		return cc.getApplicationInstances(appName);
-	}
+    public void bindService(String appName, String serviceName) {
+        cc.bindService(appName, serviceName);
+    }
 
-	public InstancesInfo getApplicationInstances(CloudApplication app) {
-		return cc.getApplicationInstances(app);
-	}
+    public void unbindService(String appName, String serviceName) {
+        cc.unbindService(appName, serviceName);
+    }
 
-	public CrashesInfo getCrashes(String appName) {
-		return cc.getCrashes(appName);
-	}
+    public InstancesInfo getApplicationInstances(String appName) {
+        return cc.getApplicationInstances(appName);
+    }
 
-	public List<CloudStack> getStacks() {
-		return cc.getStacks();
-	}
+    public InstancesInfo getApplicationInstances(CloudApplication app) {
+        return cc.getApplicationInstances(app);
+    }
 
-	public CloudStack getStack(String name) {
-		return cc.getStack(name);
-	}
+    public CrashesInfo getCrashes(String appName) {
+        return cc.getCrashes(appName);
+    }
 
-	public void rename(String appName, String newName) {
-		cc.rename(appName, newName);
-	}
+    public List<CloudStack> getStacks() {
+        return cc.getStacks();
+    }
 
-	public List<CloudDomain> getDomainsForOrg() {
-		return cc.getDomainsForOrg();
-	}
+    public CloudStack getStack(String name) {
+        return cc.getStack(name);
+    }
 
-	public List<CloudDomain> getPrivateDomains() {
-		return cc.getPrivateDomains();
-	}
+    public void rename(String appName, String newName) {
+        cc.rename(appName, newName);
+    }
 
-	public List<CloudDomain> getSharedDomains() {
-		return cc.getSharedDomains();
-	}
+    public List<CloudDomain> getDomainsForOrg() {
+        return cc.getDomainsForOrg();
+    }
 
-	public List<CloudDomain> getDomains() {
-		return cc.getDomains();
-	}
+    public List<CloudDomain> getPrivateDomains() {
+        return cc.getPrivateDomains();
+    }
 
-	public void addDomain(String domainName) {
-		cc.addDomain(domainName);
-	}
+    public List<CloudDomain> getSharedDomains() {
+        return cc.getSharedDomains();
+    }
 
-	public void deleteDomain(String domainName) {
-		cc.deleteDomain(domainName);
-	}
+    public List<CloudDomain> getDomains() {
+        return cc.getDomains();
+    }
 
-	public void removeDomain(String domainName) {
-		cc.removeDomain(domainName);
-	}
+    public void addDomain(String domainName) {
+        cc.addDomain(domainName);
+    }
 
-	public List<CloudRoute> getRoutes(String domainName) {
-		return cc.getRoutes(domainName);
-	}
+    public void deleteDomain(String domainName) {
+        cc.deleteDomain(domainName);
+    }
 
-	public void addRoute(String host, String domainName) {
-		cc.addRoute(host, domainName);
-	}
+    public void removeDomain(String domainName) {
+        cc.removeDomain(domainName);
+    }
 
-	public void deleteRoute(String host, String domainName) {
-		cc.deleteRoute(host, domainName);
-	}
+    public List<CloudRoute> getRoutes(String domainName) {
+        return cc.getRoutes(domainName);
+    }
 
-	public void registerRestLogListener(RestLogCallback callBack) {
-		cc.registerRestLogListener(callBack);
-	}
+    public void addRoute(String host, String domainName) {
+        cc.addRoute(host, domainName);
+    }
 
-	public void unRegisterRestLogListener(RestLogCallback callBack) {
-		cc.unRegisterRestLogListener(callBack);
-	}
+    public void deleteRoute(String host, String domainName) {
+        cc.deleteRoute(host, domainName);
+    }
+
+    public void registerRestLogListener(RestLogCallback callBack) {
+        cc.registerRestLogListener(callBack);
+    }
+
+    public void unRegisterRestLogListener(RestLogCallback callBack) {
+        cc.unRegisterRestLogListener(callBack);
+    }
 
 }
