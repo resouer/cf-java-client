@@ -217,7 +217,7 @@ public class CloudFoundryClient implements CloudFoundryOperations {
     }
 
     public void setQuotaToOrg(CloudQuota quota, CloudOrganization org) {
-        // TODO need to check implement and return value thru curl api
+        // TODO return value? and record the api curl
     }
 
     public void register(String email, String password) {
