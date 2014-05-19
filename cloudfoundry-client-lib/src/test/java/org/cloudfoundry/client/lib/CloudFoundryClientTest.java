@@ -1,16 +1,8 @@
 package org.cloudfoundry.client.lib;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,13 +23,13 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.HttpHost;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudEntity;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.lib.domain.CloudQuota;
 import org.cloudfoundry.client.lib.domain.CloudRoute;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
@@ -359,6 +351,13 @@ public class CloudFoundryClientTest {
 		List<CloudOrganization> orgs = connectedClient.getOrganizations();
 		assertNotNull(orgs);
 		assertTrue(orgs.size() > 0);
+	}
+
+	@Test
+	public void quotasAvailable() throws Exception {
+		List<CloudQuota> quotas = connectedClient.getQuota();
+		assertNotNull(quotas);
+		assertTrue(quotas.size() > 0);
 	}
 
 	//
