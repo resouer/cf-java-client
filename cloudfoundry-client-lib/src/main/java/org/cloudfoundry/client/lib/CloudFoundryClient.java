@@ -216,7 +216,7 @@ public class CloudFoundryClient implements CloudFoundryOperations {
         return cc.getQuotas();
     }
 
-    public void setQuotaToOrg(CloudQuota quota, CloudOrganization org) {
+    public void setQuotaToOrg(CloudOrganization org, CloudQuota quota) {
         // TODO return value? and record the api curl
     }
 
