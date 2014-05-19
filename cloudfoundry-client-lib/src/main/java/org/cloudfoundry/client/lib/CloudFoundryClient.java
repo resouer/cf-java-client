@@ -216,6 +216,10 @@ public class CloudFoundryClient implements CloudFoundryOperations {
         return cc.getQuotas();
     }
 
+    public void setQuotaToOrg(CloudQuota quota, CloudOrganization org) {
+        // TODO need to check implement and return value thru curl api
+    }
+
     public void register(String email, String password) {
         cc.register(email, password);
     }

@@ -424,6 +424,14 @@ public class CloudFoundryClientTest {
         assertTrue(quotas.size() > 0);
     }
 
+    @Test
+    public void setQuotaToOrg() throws Exception {
+        // TODO Where is the quota and org, new? or ready?
+        // List<CloudQuota> quotas = connectedClient.setQuotaToOrg();
+        // assertNotNull(quotas);
+        // assertTrue(quotas.size() > 0);
+    }
+
     //
     // Basic Application tests
     //
