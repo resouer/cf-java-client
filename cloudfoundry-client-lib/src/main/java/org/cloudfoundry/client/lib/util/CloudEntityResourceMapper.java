@@ -100,12 +100,18 @@ public class CloudEntityResourceMapper {
                 organization);
     }
 
+    @SuppressWarnings("unchecked")
     private CloudOrganization mapOrganizationResource(
             Map<String, Object> resource) {
         Boolean billingEnabled = getEntityAttribute(resource,
                 "billing_enabled", Boolean.class);
+        System.out.println(resource);
+		Map<String, Object> quotaDefinition = getEmbeddedResource(resource,
+                "quota_definition");
+        CloudQuota quota = mapQuotaResource(quotaDefinition);
+        
         return new CloudOrganization(getMeta(resource),
-                getNameOfResource(resource), billingEnabled);
+                getNameOfResource(resource), quota,billingEnabled);
     }
 
     private CloudQuota mapQuotaResource(Map<String, Object> resource) {
@@ -300,6 +306,7 @@ public class CloudEntityResourceMapper {
         }
         Map<String, Object> entity = (Map<String, Object>) resource
                 .get("entity");
+        System.out.println(entity);
         Object attributeValue = entity.get(attributeName);
         if (attributeValue == null) {
             return null;

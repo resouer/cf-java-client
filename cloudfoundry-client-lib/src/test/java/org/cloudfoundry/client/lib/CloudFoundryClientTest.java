@@ -119,14 +119,17 @@ public class CloudFoundryClientTest {
     private static final String CCNG_USER_EMAIL = System.getProperty(
             "ccng.email", "java-authenticatedClient-test-user@vmware.com");
 
+    // TODO fix parameters bug
     private static final String CCNG_USER_PASS = System
-            .getProperty("ccng.passwd");
+            .getProperty("ccng.passwd", "c1oudcow");
 
     private static final String CCNG_USER_ORG = System.getProperty("ccng.org",
             "gopivotal.com");
 
     private static final String CCNG_USER_SPACE = System.getProperty(
             "ccng.space", "test");
+    
+    private static final String CCNG_QUOTA_NAME_TEST = System.getProperty("ccng.quota", "test_quota");
 
     private static final String TEST_NAMESPACE = System.getProperty(
             "vcap.test.namespace", defaultNamespace(CCNG_USER_EMAIL));
@@ -146,7 +149,7 @@ public class CloudFoundryClientTest {
 
     private static final boolean SKIP_INJVM_PROXY = Boolean
             .getBoolean("http.skipInJvmProxy");
-
+    
     private static String defaultDomainName = null;
 
     private static HttpProxyConfiguration httpProxyConfiguration;
@@ -224,11 +227,16 @@ public class CloudFoundryClientTest {
     public void setUp() throws Exception {
         URL cloudControllerUrl;
 
-        cloudControllerUrl = new URL(CCNG_API_URL);
+//        cloudControllerUrl = new URL(CCNG_API_URL);
+//        connectedClient = new CloudFoundryClient(new CloudCredentials(
+//                CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
+//                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
+//                CCNG_API_SSL);
+        // TODO fix parameters bug!
         connectedClient = new CloudFoundryClient(new CloudCredentials(
-                CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
-                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
-                CCNG_API_SSL);
+                "admin", "c1oudc0w"), new URL("http://api.172.17.4.12.xip.io"),
+                "zju", "development", httpProxyConfiguration,
+                false);
         connectedClient.login();
         defaultDomainName = getDefaultDomain(connectedClient.getDomains())
                 .getName();
@@ -425,11 +433,32 @@ public class CloudFoundryClientTest {
     }
 
     @Test
+    public void createQuota() throws Exception{
+    	CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
+    	
+    	connectedClient.createQuota(cloudQuota);
+    	
+    	CloudQuota result = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
+    	connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); // clear test
+    	
+    	assertNotNull(result);
+    }
+    
+    @Test
     public void setQuotaToOrg() throws Exception {
-        // TODO Where is the quota and org, new? or before class?
-        // List<CloudQuota> quotas = connectedClient.setQuotaToOrg();
-        // assertNotNull(quotas);
-        // assertTrue(quotas.size() > 0);
+    	 CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
+     	 connectedClient.createQuota(cloudQuota); // prepare quota
+     	 
+         connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_QUOTA_NAME_TEST);
+         
+         CloudOrganization org = connectedClient.getOrgByName(CCNG_USER_ORG, true);
+         CloudQuota newQuota = org.getQuota();
+         
+         // clear test
+         connectedClient.setQuotaToOrg(CCNG_USER_ORG, "default");
+         connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); 
+         
+         assertEquals(cloudQuota.getName(), newQuota.getName());
     }
 
     //

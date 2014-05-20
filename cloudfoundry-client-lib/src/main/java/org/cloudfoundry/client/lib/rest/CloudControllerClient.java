@@ -66,8 +66,20 @@ public interface CloudControllerClient {
     List<CloudSpace> getSpaces();
 
     List<CloudOrganization> getOrganizations();
+    
+    CloudOrganization getOrgByName(String orgName, boolean required);
+    
 
     List<CloudQuota> getQuotas();
+    
+    CloudQuota getQuotaByName(String quotaName, boolean required);
+    
+    void createQuota(CloudQuota quota);
+    
+    void deleteQuota(String quotaName);
+    
+    void setQuotaToOrg(String orgName, String quotaName);
+    
 
     OAuth2AccessToken login();
 

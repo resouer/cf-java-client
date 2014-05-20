@@ -629,7 +629,6 @@ public class CloudControllerClientImpl implements CloudControllerClient {
     }
 
     public List<CloudQuota> getQuotas() {
-        // TODO inline-relations-depth ?
         String urlPath = "/v2/quota_definitions";
         List<Map<String, Object>> resourceList = getAllResources(urlPath, null);
         List<CloudQuota> quotas = new ArrayList<CloudQuota>();
@@ -638,6 +637,52 @@ public class CloudControllerClientImpl implements CloudControllerClient {
         }
         return quotas;
     }
+    
+    public void createQuota(CloudQuota quota){
+    	 String setPath = "/v2/quota_definitions";
+         Map<String, Object> setVars = new HashMap<String, Object>();
+         setVars.put("name", quota.getName());
+         setVars.put("memory_limit", quota.getMemoryLimit());
+         setVars.put("total_routes", quota.getTotalRoutes());
+         setVars.put("total_services", quota.getTotalServices());
+         setVars.put("non_basic_services_allowed", quota.isNonBasicServicesAllowed());
+         
+         HashMap<String, Object> setRequest = new HashMap<String, Object>();
+         getRestTemplate().put(getUrl(setPath), setRequest, setVars);
+    }
+    
+    public void deleteQuota(String quotaName){
+    	CloudQuota quota = this.getQuotaByName(quotaName, true);
+    	String setPath = "/v2/quota_definitions/{quotaGuid}";
+        Map<String, Object> setVars = new HashMap<String, Object>();
+        setVars.put("quotaGuid", quota.getMeta().getGuid());
+        
+        HashMap<String, Object> setRequest = new HashMap<String, Object>();
+        getRestTemplate().delete(getUrl(setPath), setRequest, setVars);
+    }
+    
+    /**
+     * Set quota to organization
+     * 
+     * @param orgName
+     * @param quotaName 
+     */
+    public void setQuotaToOrg(String orgName, String quotaName){
+    	CloudQuota quota = this.getQuotaByName(quotaName, true);
+    	CloudOrganization org = this.getOrgByName(orgName, true);
+    	
+    	doSetQuotaToOrg(org.getMeta().getGuid(), quota.getMeta().getGuid());
+    }
+   
+    private void doSetQuotaToOrg(UUID orgGuid, UUID quotaGuid) {
+        String setPath = "/v2/organizations/{org}";
+        Map<String, Object> setVars = new HashMap<String, Object>();
+        setVars.put("org", orgGuid);
+        setVars.put("quota_definition_guid", quotaGuid);
+        HashMap<String, Object> setRequest = new HashMap<String, Object>();
+        getRestTemplate().put(getUrl(setPath), setRequest, setVars);
+    }
+
 
     public OAuth2AccessToken login() {
         token = oauthClient.getToken(cloudCredentials.getEmail(),
@@ -1066,7 +1111,62 @@ public class CloudControllerClientImpl implements CloudControllerClient {
         }
         return domains;
     }
-
+    
+      
+    /**
+     * Get organization by given name.
+     * 
+     * @param orgName
+     * @param required
+     * @return CloudOrganization instance
+     */
+    public CloudOrganization getOrgByName(String orgName, boolean required){
+    	Map<String, Object> urlVars = new HashMap<String, Object>();
+        String urlPath = "/v2/organizations?inline-relations-depth=1&q=name:{name}";
+        urlVars.put("name", orgName);
+        CloudOrganization org = null;
+        List<Map<String, Object>> resourceList = getAllResources(urlPath,
+                urlVars);
+        if (resourceList.size() > 0) {
+            Map<String, Object> resource = resourceList.get(0);
+            org = resourceMapper.mapResource(resource, CloudOrganization.class);
+        }
+        
+        if (org == null && required) {
+            throw new IllegalArgumentException("Organization '" + orgName
+                    + "' not found.");
+        }        
+    	
+    	return org;
+    }
+    
+    /**
+     * Get quota by given name.
+     * 
+     * @param quotaName
+     * @param required
+     * @return CloudQuota instance
+     */
+    public CloudQuota getQuotaByName(String quotaName, boolean required){
+    	Map<String, Object> urlVars = new HashMap<String, Object>();
+        String urlPath = "/v2/quota_definitions?q=name:{name}";
+        urlVars.put("name", quotaName);
+        CloudQuota quota = null;
+        List<Map<String, Object>> resourceList = getAllResources(urlPath,
+                urlVars);
+        if (resourceList.size() > 0) {
+            Map<String, Object> resource = resourceList.get(0);
+            quota = resourceMapper.mapResource(resource, CloudQuota.class);
+        }
+        
+        if (quota == null && required) {
+            throw new IllegalArgumentException("Quota '" + quotaName
+                    + "' not found.");
+        }        
+    	
+    	return quota;
+    }
+    
     private UUID getDomainGuid(String domainName, boolean required) {
         Map<String, Object> urlVars = new HashMap<String, Object>();
         String urlPath = "/v2/domains?inline-relations-depth=1&q=name:{name}";
@@ -1577,7 +1677,7 @@ public class CloudControllerClientImpl implements CloudControllerClient {
         UUID domainGuid = getDomainGuid(domainName, true);
         doAddRoute(host, domainGuid);
     }
-
+    
     public void deleteRoute(String host, String domainName) {
         assertSpaceProvided("delete route for domain");
         UUID domainGuid = getDomainGuid(domainName, true);

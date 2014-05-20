@@ -211,13 +211,29 @@ public class CloudFoundryClient implements CloudFoundryOperations {
     public List<CloudOrganization> getOrganizations() {
         return cc.getOrganizations();
     }
+    
+    public CloudOrganization getOrgByName(String orgName, boolean required){
+    	return cc.getOrgByName(orgName, required);
+    }
 
     public List<CloudQuota> getQuotas() {
         return cc.getQuotas();
     }
 
-    public void setQuotaToOrg(CloudOrganization org, CloudQuota quota) {
-        // TODO return value? and record the api curl
+    public CloudQuota getQuotaByName(String quotaName, boolean required){
+    	return cc.getQuotaByName(quotaName, required);
+    }
+    
+    public void setQuotaToOrg(String orgName, String quotaName) {
+        cc.setQuotaToOrg(orgName, quotaName);
+    }
+    
+    public void createQuota(CloudQuota quota){
+    	cc.createQuota(quota);
+    }
+    
+    public void deleteQuota(String quotaName){
+    	cc.deleteQuota(quotaName);
     }
 
     public void register(String email, String password) {
