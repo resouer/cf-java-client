@@ -638,17 +638,20 @@ public class CloudControllerClientImpl implements CloudControllerClient {
         return quotas;
     }
     
+    /**
+     * Create quota from a CloudQuota instance (Quota Plan)
+     * 
+     * @param quota
+     */
     public void createQuota(CloudQuota quota){
     	 String setPath = "/v2/quota_definitions";
-         Map<String, Object> setVars = new HashMap<String, Object>();
-         setVars.put("name", quota.getName());
-         setVars.put("memory_limit", quota.getMemoryLimit());
-         setVars.put("total_routes", quota.getTotalRoutes());
-         setVars.put("total_services", quota.getTotalServices());
-         setVars.put("non_basic_services_allowed", quota.isNonBasicServicesAllowed());
-         
          HashMap<String, Object> setRequest = new HashMap<String, Object>();
-         getRestTemplate().put(getUrl(setPath), setRequest, setVars);
+         setRequest.put("name", quota.getName());
+         setRequest.put("memory_limit", quota.getMemoryLimit());
+         setRequest.put("total_routes", quota.getTotalRoutes());
+         setRequest.put("total_services", quota.getTotalServices());
+         setRequest.put("non_basic_services_allowed", quota.isNonBasicServicesAllowed());
+         getRestTemplate().postForObject(getUrl(setPath), setRequest, String.class);
     }
     
     public void deleteQuota(String quotaName){
@@ -656,9 +659,7 @@ public class CloudControllerClientImpl implements CloudControllerClient {
     	String setPath = "/v2/quota_definitions/{quotaGuid}";
         Map<String, Object> setVars = new HashMap<String, Object>();
         setVars.put("quotaGuid", quota.getMeta().getGuid());
-        
-        HashMap<String, Object> setRequest = new HashMap<String, Object>();
-        getRestTemplate().delete(getUrl(setPath), setRequest, setVars);
+        getRestTemplate().delete(getUrl(setPath), setVars);
     }
     
     /**
@@ -678,8 +679,9 @@ public class CloudControllerClientImpl implements CloudControllerClient {
         String setPath = "/v2/organizations/{org}";
         Map<String, Object> setVars = new HashMap<String, Object>();
         setVars.put("org", orgGuid);
-        setVars.put("quota_definition_guid", quotaGuid);
         HashMap<String, Object> setRequest = new HashMap<String, Object>();
+        setRequest.put("quota_definition_guid", quotaGuid);
+        
         getRestTemplate().put(getUrl(setPath), setRequest, setVars);
     }
 

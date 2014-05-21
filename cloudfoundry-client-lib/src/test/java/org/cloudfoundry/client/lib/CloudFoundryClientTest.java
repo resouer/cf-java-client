@@ -122,9 +122,12 @@ public class CloudFoundryClientTest {
     // TODO fix parameters bug
     private static final String CCNG_USER_PASS = System
             .getProperty("ccng.passwd", "c1oudcow");
-
+    // TODO 
     private static final String CCNG_USER_ORG = System.getProperty("ccng.org",
-            "gopivotal.com");
+            "zju");
+    
+    private static final String CCNG_USER_QUOTA = System.getProperty("ccng.quota",
+            "default");
 
     private static final String CCNG_USER_SPACE = System.getProperty(
             "ccng.space", "test");
@@ -232,11 +235,13 @@ public class CloudFoundryClientTest {
 //                CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
 //                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
 //                CCNG_API_SSL);
+        
         // TODO fix parameters bug!
         connectedClient = new CloudFoundryClient(new CloudCredentials(
                 "admin", "c1oudc0w"), new URL("http://api.172.17.4.12.xip.io"),
                 "zju", "development", httpProxyConfiguration,
                 false);
+        
         connectedClient.login();
         defaultDomainName = getDefaultDomain(connectedClient.getDomains())
                 .getName();
@@ -246,6 +251,7 @@ public class CloudFoundryClientTest {
             tearDown();
         }
         tearDownComplete = false;
+        
         connectedClient.addDomain(TEST_DOMAIN);
 
         // connectedClient.registerRestLogListener(new RestLogger("CF_REST"));
@@ -433,32 +439,47 @@ public class CloudFoundryClientTest {
     }
 
     @Test
-    public void createQuota() throws Exception{
+    public void createAndDeleteQuota() throws Exception{
     	CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
     	
     	connectedClient.createQuota(cloudQuota);
+    	CloudQuota afterCreate = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
     	
-    	CloudQuota result = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
-    	connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); // clear test
+    	assertNotNull(afterCreate);
+
+    	connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); 
+    	CloudQuota afterDelete = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, false);
     	
-    	assertNotNull(result);
+    	assertNull(afterDelete);
+    	
     }
     
     @Test
     public void setQuotaToOrg() throws Exception {
-    	 CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
-     	 connectedClient.createQuota(cloudQuota); // prepare quota
-     	 
-         connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_QUOTA_NAME_TEST);
+    	
+		// if needed, set default quota to default org 
+	    if(null == connectedClient.getQuotaByName(CCNG_USER_QUOTA, false)){
+	    	CloudQuota defaultPlan = new CloudQuota(null,CCNG_USER_QUOTA);
+	        connectedClient.createQuota(defaultPlan);
+	        connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_USER_QUOTA);
+	    }    	
+	    
+	    // create and set test_quota to default org
+	    CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
+	    connectedClient.createQuota(cloudQuota); 
+	    connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_QUOTA_NAME_TEST);
+	    
+	    // get the binded quota of default org
+	    CloudOrganization org = connectedClient.getOrgByName(CCNG_USER_ORG, true);
+	    CloudQuota newQuota = org.getQuota();
+	    
+	    // binded quota should be equals to test_quota
+	    assertEquals(cloudQuota.getName(), newQuota.getName());         
+	    
+	    // restore org to default quota
+	    connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_USER_QUOTA);
+	    connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); 
          
-         CloudOrganization org = connectedClient.getOrgByName(CCNG_USER_ORG, true);
-         CloudQuota newQuota = org.getQuota();
-         
-         // clear test
-         connectedClient.setQuotaToOrg(CCNG_USER_ORG, "default");
-         connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); 
-         
-         assertEquals(cloudQuota.getName(), newQuota.getName());
     }
 
     //

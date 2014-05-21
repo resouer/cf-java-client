@@ -100,16 +100,16 @@ public class CloudEntityResourceMapper {
                 organization);
     }
 
-    @SuppressWarnings("unchecked")
     private CloudOrganization mapOrganizationResource(
             Map<String, Object> resource) {
         Boolean billingEnabled = getEntityAttribute(resource,
                 "billing_enabled", Boolean.class);
-        System.out.println(resource);
 		Map<String, Object> quotaDefinition = getEmbeddedResource(resource,
                 "quota_definition");
-        CloudQuota quota = mapQuotaResource(quotaDefinition);
-        
+		CloudQuota quota = null;
+		if (quotaDefinition != null) {
+			quota = mapQuotaResource(quotaDefinition);
+        }
         return new CloudOrganization(getMeta(resource),
                 getNameOfResource(resource), quota,billingEnabled);
     }
@@ -306,7 +306,6 @@ public class CloudEntityResourceMapper {
         }
         Map<String, Object> entity = (Map<String, Object>) resource
                 .get("entity");
-        System.out.println(entity);
         Object attributeValue = entity.get(attributeName);
         if (attributeValue == null) {
             return null;
@@ -314,8 +313,11 @@ public class CloudEntityResourceMapper {
         if (targetClass == String.class) {
             return (T) String.valueOf(attributeValue);
         }
+        if (targetClass == Long.class) {
+            return (T) Long.valueOf(String.valueOf(attributeValue));
+        }
         if (targetClass == Integer.class || targetClass == Boolean.class
-                || targetClass == Map.class || targetClass == List.class) {
+                || targetClass == Map.class || targetClass == List.class ) {
             return (T) attributeValue;
         }
         if (targetClass == UUID.class && attributeValue instanceof String) {
