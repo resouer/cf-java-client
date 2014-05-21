@@ -122,7 +122,7 @@ public class CloudFoundryClientTest {
     // TODO fix parameters bug
     private static final String CCNG_USER_PASS = System
             .getProperty("ccng.passwd", "c1oudcow");
-    // TODO 
+    // TODO fix parameters bug
     private static final String CCNG_USER_ORG = System.getProperty("ccng.org",
             "zju");
     
@@ -228,7 +228,7 @@ public class CloudFoundryClientTest {
 
     @Before
     public void setUp() throws Exception {
-        URL cloudControllerUrl;
+//        URL cloudControllerUrl;
 
 //        cloudControllerUrl = new URL(CCNG_API_URL);
 //        connectedClient = new CloudFoundryClient(new CloudCredentials(
@@ -236,7 +236,7 @@ public class CloudFoundryClientTest {
 //                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
 //                CCNG_API_SSL);
         
-        // TODO fix parameters bug!
+        // TODO fix parameters bug
         connectedClient = new CloudFoundryClient(new CloudCredentials(
                 "admin", "c1oudc0w"), new URL("http://api.172.17.4.12.xip.io"),
                 "zju", "development", httpProxyConfiguration,
