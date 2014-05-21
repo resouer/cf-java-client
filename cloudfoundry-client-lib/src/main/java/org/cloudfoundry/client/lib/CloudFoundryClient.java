@@ -541,4 +541,9 @@ public class CloudFoundryClient implements CloudFoundryOperations {
         cc.unRegisterRestLogListener(callBack);
     }
 
+	public void updateQuota(CloudQuota quota, String name) {
+		cc.updateQuota(quota, name);
+		
+	}
+
 }
