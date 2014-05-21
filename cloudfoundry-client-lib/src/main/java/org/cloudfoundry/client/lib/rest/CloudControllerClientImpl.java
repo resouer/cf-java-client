@@ -654,6 +654,25 @@ public class CloudControllerClientImpl implements CloudControllerClient {
          getRestTemplate().postForObject(getUrl(setPath), setRequest, String.class);
     }
     
+    public void updateQuota(CloudQuota quota, String name) {
+    	CloudQuota oldQuota = this.getQuotaByName(name, true);
+    	
+    	String setPath = "/v2/quota_definitions/{quotaGuid}";
+    	
+        Map<String, Object> setVars = new HashMap<String, Object>();
+        setVars.put("quotaGuid", oldQuota.getMeta().getGuid());
+        
+        HashMap<String, Object> setRequest = new HashMap<String, Object>();
+        setRequest.put("name", quota.getName());
+        setRequest.put("memory_limit", quota.getMemoryLimit());
+        setRequest.put("total_routes", quota.getTotalRoutes());
+        setRequest.put("total_services", quota.getTotalServices());
+        setRequest.put("non_basic_services_allowed", quota.isNonBasicServicesAllowed());
+        
+        getRestTemplate().put(getUrl(setPath), setRequest, setVars);
+        
+	}
+    
     public void deleteQuota(String quotaName){
     	CloudQuota quota = this.getQuotaByName(quotaName, true);
     	String setPath = "/v2/quota_definitions/{quotaGuid}";

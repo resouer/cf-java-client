@@ -70,11 +70,15 @@ public interface CloudControllerClient {
     CloudOrganization getOrgByName(String orgName, boolean required);
     
 
+    // Quota operations
+    
     List<CloudQuota> getQuotas();
     
     CloudQuota getQuotaByName(String quotaName, boolean required);
     
     void createQuota(CloudQuota quota);
+    
+    void updateQuota(CloudQuota quota, String name);
     
     void deleteQuota(String quotaName);
     
@@ -217,5 +221,6 @@ public interface CloudControllerClient {
     void registerRestLogListener(RestLogCallback callBack);
 
     void unRegisterRestLogListener(RestLogCallback callBack);
+
 
 }

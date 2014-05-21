@@ -432,17 +432,22 @@ public class CloudFoundryClientTest {
     }
 
     @Test
-    public void createAndDeleteQuota() throws Exception{
+    public void CURDQuota() throws Exception{
+    	// create quota
     	CloudQuota cloudQuota = new CloudQuota(null,CCNG_QUOTA_NAME_TEST);
-    	
     	connectedClient.createQuota(cloudQuota);
     	CloudQuota afterCreate = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
-    	
     	assertNotNull(afterCreate);
+    	
+    	// change quota mem to 10240
+    	afterCreate.setMemoryLimit(10240);
+    	connectedClient.updateQuota(afterCreate, CCNG_QUOTA_NAME_TEST);
+    	CloudQuota afterUpdate = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
+    	assertEquals(10240,afterUpdate.getMemoryLimit());
 
+    	// delete the quota
     	connectedClient.deleteQuota(CCNG_QUOTA_NAME_TEST); 
     	CloudQuota afterDelete = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, false);
-    	
     	assertNull(afterDelete);
     	
     }
