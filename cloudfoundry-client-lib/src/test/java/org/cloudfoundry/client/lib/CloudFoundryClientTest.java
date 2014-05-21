@@ -119,12 +119,11 @@ public class CloudFoundryClientTest {
     private static final String CCNG_USER_EMAIL = System.getProperty(
             "ccng.email", "java-authenticatedClient-test-user@vmware.com");
 
-    // TODO fix parameters bug
     private static final String CCNG_USER_PASS = System
-            .getProperty("ccng.passwd", "c1oudcow");
-    // TODO fix parameters bug
+            .getProperty("ccng.passwd");
+
     private static final String CCNG_USER_ORG = System.getProperty("ccng.org",
-            "zju");
+            "gopivotal.com");
     
     private static final String CCNG_USER_QUOTA = System.getProperty("ccng.quota",
             "default");
@@ -228,19 +227,13 @@ public class CloudFoundryClientTest {
 
     @Before
     public void setUp() throws Exception {
-//        URL cloudControllerUrl;
+        URL cloudControllerUrl;
 
-//        cloudControllerUrl = new URL(CCNG_API_URL);
-//        connectedClient = new CloudFoundryClient(new CloudCredentials(
-//                CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
-//                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
-//                CCNG_API_SSL);
-        
-        // TODO fix parameters bug
+        cloudControllerUrl = new URL(CCNG_API_URL);
         connectedClient = new CloudFoundryClient(new CloudCredentials(
-                "admin", "c1oudc0w"), new URL("http://api.172.17.4.12.xip.io"),
-                "zju", "development", httpProxyConfiguration,
-                false);
+                CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
+                CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
+                CCNG_API_SSL);
         
         connectedClient.login();
         defaultDomainName = getDefaultDomain(connectedClient.getDomains())
