@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpHost;
 import org.apache.http.conn.params.ConnRoutePNames;
@@ -102,6 +104,10 @@ import org.springframework.web.client.RestTemplate;
 public class CloudFoundryClientTest {
 
     private CloudFoundryClient connectedClient;
+    
+    private static final String EMAIL_PATTERN = 
+    		"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+    		+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     // Pass -Dccng.target=http://api.cloudfoundry.com, vcap.me, or your own
     // cloud -- must point to a v2 cloud controller
@@ -234,6 +240,10 @@ public class CloudFoundryClientTest {
                 CCNG_USER_EMAIL, CCNG_USER_PASS), cloudControllerUrl,
                 CCNG_USER_ORG, CCNG_USER_SPACE, httpProxyConfiguration,
                 CCNG_API_SSL);
+    	/*connectedClient = new CloudFoundryClient(new CloudCredentials(
+                "admin", "c1oudc0w"), new URL("http://api.172.17.4.12.xip.io"),
+                "zju", "development", httpProxyConfiguration,
+                false);*/
         
         connectedClient.login();
         defaultDomainName = getDefaultDomain(connectedClient.getDomains())
@@ -1798,8 +1808,16 @@ public class CloudFoundryClientTest {
     }
 
     private static String defaultNamespace(String email) {
-        return email.substring(0, email.indexOf('@')).replaceAll("\\.", "-")
+    	Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+    	Matcher matcher = pattern.matcher(email);
+    	String namespace="";
+    	if(matcher.matches()){
+        namespace=email.substring(0, email.indexOf('@')).replaceAll("\\.", "-")
                 .replaceAll("\\+", "-");
+    	}else{
+    		namespace=email;
+    	}
+    	return namespace;
     }
 
     //
