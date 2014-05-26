@@ -450,10 +450,10 @@ public class CloudFoundryClientTest {
 			connectedClient.createQuota(cloudQuota);
 		} catch (CloudFoundryException e) {
 			if (HttpStatus.FORBIDDEN == e.getStatusCode()) {
-				flag = false;
+			    flag = false;
 			}
 		}
-		// if we have create quota permission, go on
+		// check if we have right permission
 		assumeTrue(flag);
     	CloudQuota afterCreate = connectedClient.getQuotaByName(CCNG_QUOTA_NAME_TEST, true);
     	assertNotNull(afterCreate);
@@ -491,10 +491,10 @@ public class CloudFoundryClientTest {
 			connectedClient.createQuota(cloudQuota);
 		} catch (CloudFoundryException e) {
 			if (HttpStatus.FORBIDDEN == e.getStatusCode()) {
-				flag = false;
+			    flag = false;
 			}
 		}
-		// if we have create quota permission, go on
+		// check if we have right permission
 		assumeTrue(flag);
 	    connectedClient.setQuotaToOrg(CCNG_USER_ORG, CCNG_QUOTA_NAME_TEST);
 	    
@@ -505,7 +505,7 @@ public class CloudFoundryClientTest {
 		CloudQuota newQuota = newOrg.getQuota();
 	    
 	    // binded quota should be equals to test_quota
-	    assertEquals(cloudQuota.getName(), newQuota.getName());         
+	    assertEquals(CCNG_QUOTA_NAME_TEST, newQuota.getName());         
 	    
 	    // restore org to default quota
 		connectedClient.setQuotaToOrg(CCNG_USER_ORG, oldQuota.getName());
@@ -1831,11 +1831,12 @@ public class CloudFoundryClientTest {
     }
 
     private static String defaultNamespace(String email) {
+        // escape non-email user like "admin"
     	Pattern pattern = Pattern.compile(EMAIL_PATTERN);
     	Matcher matcher = pattern.matcher(email);
     	String namespace="";
     	if(matcher.matches()){
-        namespace=email.substring(0, email.indexOf('@')).replaceAll("\\.", "-")
+    	    namespace=email.substring(0, email.indexOf('@')).replaceAll("\\.", "-")
                 .replaceAll("\\+", "-");
     	}else{
     		namespace=email;
